@@ -1,4 +1,4 @@
-# Which Factor Accounts for Most Genetic Diversity in a Widely Distributed Herbaceous Species from Southern South American Grasslands? (in press)
+# Which Factor Accounts for Most Genetic Diversity in a Widely Distributed Herbaceous Species from Southern South American Grasslands? (Ungoing Review)
 
 ## Overview
 This repository contains the analytical pipeline and datasets for a research study investigating the drivers of genetic diversity and adaptation in *Petunia axillaris*, a widely distributed herbaceous species in the grasslands of Southern South America. The study utilizes high-throughput genomic data (RAD-seq - GBS) integrated with environmental variables to assess the relative contributions of geographic distance, climatic factors, and soil properties to the observed genetic structure.
