@@ -1,0 +1,1 @@
+/data/users/guzmans/soft/BayeScan2.1/binaries/BayeScan2.1_linux64bits Paxil_M095_noLD_Bayescan -threads 64 -od . 

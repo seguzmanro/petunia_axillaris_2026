@@ -55,7 +55,7 @@ cd ../07_freebayes
 samtools index ../06_bamaddrg/merge_paxil.bam
 
 # Call Variants using freebayes
-freebayes -b ../06_bamaddrg/merge_paxil.bam -f $REF_GENOME -v ${PREFIX_SP}Variants.vcf --min-mapping-quality 20 --min-base-quality 30 -C 12
+freebayes -b ../06_bamaddrg/merge_paxil.bam -f $REF_GENOME -v ${PREFIX_SP}Variants.vcf --min-mapping-quality 20 --min-base-quality 30 -C 10
 
 # Remove variants other than SNPs
 awk '{ if ($8 !~ /mnp/) print $0}' ${PREFIX_SP}Variants.vcf | awk '{ if ($8 !~ /complex/) print $0}' | awk '{ if ($8 !~ /ins/) print $0}' | awk '{ if ($8 !~ /del/) print $0 }' | awk '{ if ($8 !~ /snp,/) print $0}' > ${PREFIX_SP}OnlySNPs.vcf
