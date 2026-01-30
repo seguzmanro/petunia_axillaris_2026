@@ -9,5 +9,4 @@
 *_fst*
 stats/
 screenlog.0
-1-VariantCallFilt/07_freebayes/PaxilVariants.vcf
-1-VariantCallFilt/07_freebayes/PaxilOnlySNPs.vcf
+*.vcf*
