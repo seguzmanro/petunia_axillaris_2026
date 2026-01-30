@@ -1,0 +1,98 @@
+
+1. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721068; Sample name: axil_14_63; SRA: SRS15760610
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil14
+Package:	Plant; version 1.0
+Accession: SAMN31721068	ID: 31721068
+
+2. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721067; Sample name: axil_12_63; SRA: SRS15760609
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil12
+Package:	Plant; version 1.0
+Accession: SAMN31721067	ID: 31721067
+
+3. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721066; Sample name: axil_11_63; SRA: SRS15760607
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil11
+Package:	Plant; version 1.0
+Accession: SAMN31721066	ID: 31721066
+
+4. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721065; Sample name: axil_10_63; SRA: SRS15760606
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil10
+Package:	Plant; version 1.0
+Accession: SAMN31721065	ID: 31721065
+
+5. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721064; Sample name: axil_09_63; SRA: SRS15760605
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil9
+Package:	Plant; version 1.0
+Accession: SAMN31721064	ID: 31721064
+
+6. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721063; Sample name: axil_1946_IS; SRA: SRS15760604
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1946
+Package:	Plant; version 1.0
+Accession: SAMN31721063	ID: 31721063
+
+7. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721062; Sample name: axil_1940_IS; SRA: SRS15760603
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1940
+Package:	Plant; version 1.0
+Accession: SAMN31721062	ID: 31721062
+
+8. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721061; Sample name: axil_1937_IS; SRA: SRS15760602
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1937
+Package:	Plant; version 1.0
+Accession: SAMN31721061	ID: 31721061
+
+9. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721060; Sample name: axil_1936_IS; SRA: SRS15760601
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1936
+Package:	Plant; version 1.0
+Accession: SAMN31721060	ID: 31721060
+
+10. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721059; Sample name: axil_1935_IS; SRA: SRS15760600
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1935
+Package:	Plant; version 1.0
+Accession: SAMN31721059	ID: 31721059
+
+11. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721058; Sample name: axil_1120_43; SRA: SRS15760599
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1120
+Package:	Plant; version 1.0
+Accession: SAMN31721058	ID: 31721058
+
+12. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721057; Sample name: axil_1117_43; SRA: SRS15760598
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1117
+Package:	Plant; version 1.0
+Accession: SAMN31721057	ID: 31721057
+
+13. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721056; Sample name: axil_1116_43; SRA: SRS15760816
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1116
+Package:	Plant; version 1.0
+Accession: SAMN31721056	ID: 31721056
+
+14. Plant sample from Petunia axillaris subsp. axillaris
+Identifiers:	BioSample: SAMN31721055; Sample name: axil_1115_43; SRA: SRS15760815
+Organism:	Petunia axillaris subsp. axillaris
+		isolate: Paxil1115
+Package:	Plant; version 1.0
+Accession: SAMN31721055	ID: 31721055

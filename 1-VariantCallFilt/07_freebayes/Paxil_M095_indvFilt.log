@@ -1,0 +1,16 @@
+
+VCFtools - 0.1.15
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf Paxil_M095_noMono.recode.vcf
+	--remove bad_indv
+	--recode-INFO-all
+	--out Paxil_M095_indvFilt
+	--recode
+
+Excluding individuals in 'exclude' list
+After filtering, kept 63 out of 64 Individuals
+Outputting VCF file...
+After filtering, kept 21297 out of a possible 21297 Sites
+Run Time = 13.00 seconds

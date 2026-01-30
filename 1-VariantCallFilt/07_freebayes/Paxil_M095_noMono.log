@@ -1,0 +1,16 @@
+
+VCFtools - 0.1.15
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf PaxilOnlySNPs.vcf
+	--recode-INFO-all
+	--maf 0.01
+	--max-missing 0.95
+	--out Paxil_M095_noMono
+	--recode
+
+After filtering, kept 64 out of 64 Individuals
+Outputting VCF file...
+After filtering, kept 21297 out of a possible 68713 Sites
+Run Time = 14.00 seconds

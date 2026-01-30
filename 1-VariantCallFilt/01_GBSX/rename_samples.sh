@@ -1,0 +1,14 @@
+mv SAMN31721068.fastq.gz axil_14_63.R1.fastq.gz
+mv SAMN31721067.fastq.gz axil_12_63.R1.fastq.gz
+mv SAMN31721066.fastq.gz axil_11_63.R1.fastq.gz
+mv SAMN31721065.fastq.gz axil_10_63.R1.fastq.gz
+mv SAMN31721064.fastq.gz axil_09_63.R1.fastq.gz
+mv SAMN31721063.fastq.gz axil_1946.R1.fastq.gz
+mv SAMN31721062.fastq.gz axil_1940.R1.fastq.gz
+mv SAMN31721061.fastq.gz axil_1937.R1.fastq.gz
+mv SAMN31721060.fastq.gz axil_1936.R1.fastq.gz
+mv SAMN31721059.fastq.gz axil_1935.R1.fastq.gz
+mv SAMN31721058.fastq.gz axil_1120_43.R1.fastq.gz
+mv SAMN31721057.fastq.gz axil_1117_43.R1.fastq.gz
+mv SAMN31721056.fastq.gz axil_1116_43.R1.fastq.gz
+mv SAMN31721055.fastq.gz axil_1115_43.R1.fastq.gz

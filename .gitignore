@@ -1,0 +1,13 @@
+*.bam*
+*.fastq*
+*.fq*
+*.fa*
+*.fasta*
+*.sel*
+*_AccRte*
+*_Verif*
+*_fst*
+stats/
+screenlog.0
+1-VariantCallFilt/07_freebayes/PaxilVariants.vcf
+1-VariantCallFilt/07_freebayes/PaxilOnlySNPs.vcf
