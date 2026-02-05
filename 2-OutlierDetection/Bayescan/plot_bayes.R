@@ -92,17 +92,20 @@ load_mcmc_chains <- function(sel_files, thin = 10) {
 run_convergence_diagnostics <- function(chains, output_dir = ".") {
   cat("Running MCMC convergence diagnostics...\n\n")
   
-  # Plot traceplots
+  # Process each chain separately
   for (i in seq_along(chains)) {
-    cat(sprintf("Plotting traceplot for: %s\n", names(chains)[i]))
+    chain_name <- names(chains)[i]
+    base_name <- tools::file_path_sans_ext(basename(chain_name))
+    
+    cat(sprintf("Processing chain: %s\n", chain_name))
+    
+    # Plot traceplots
     plot(chains[[i]])
-  }
-  
-  # Save diagnostics using ggmcmc
-  if (length(chains) > 0) {
-    diag_file <- file.path(output_dir, "bayesian_diagnostics")
+    
+    # Save diagnostics using ggmcmc with chain-specific filename
+    diag_file <- file.path(output_dir, paste0(base_name, "_diagnostics"))
     cat(sprintf("Saving detailed diagnostics to: %s.pdf\n", diag_file))
-    ggmcmc(ggs(chains[[1]]), file = paste0(diag_file,".pdf"), param_page = 5)
+    ggmcmc(ggs(chains[[i]]), file = paste0(diag_file, ".pdf"), param_page = 5)
   }
   
   # Autocorrelation diagnosis
@@ -358,19 +361,19 @@ main <- function() {
   # Example configurations
   
   # Uncomment this for Bayescan
-  config$analysis_type <- "bayescan"
-  config$working_dir <- "./"
-  config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf"
-  config$results_dir <- "."
-  config$fst_pattern <- "_fst\\.txt$"
-  config$fdr_threshold <- 0.01
+  # config$analysis_type <- "bayescan"
+  # config$working_dir <- "./"
+  # config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf"
+  # config$results_dir <- "."
+  # config$fst_pattern <- "_fst\\.txt$"
+  # config$fdr_threshold <- 0.01
   
   # Uncomment this for BayescEnv (adjust paths as needed)
   # config$analysis_type <- "bayescenv"
   # config$working_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv/"
-  # config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf"
-  # config$results_dir <- "./Results"
-  # config$fst_pattern <- "fst\\.txt$"  # Adjust if filenames are different
+  # config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz"
+  # config$results_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv/Results"
+  # config$fst_pattern <- "_fst\\.txt$"  # Adjust if filenames are different
   # config$fdr_threshold <- 0.01
   
   # Run processing
