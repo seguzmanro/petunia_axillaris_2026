@@ -1,0 +1,18 @@
+PLINK v1.90b6.10 64-bit (17 Jun 2019)
+Options in effect:
+  --allow-extra-chr
+  --const-fid
+  --out Paxil_M095_PutatNeutral.PLINK
+  --vcf Paxil_M095_PutatNeutral.modCHR.vcf
+
+Hostname: ppgbm1
+Working directory: /home/lem/Documents/guzmanrs/Admixture/Paxil_M095
+Start time: Tue Oct 15 16:39:07 2024
+
+Random number seed: 1729021147
+64233 MB RAM detected; reserving 32116 MB for main workspace.
+--vcf: Paxil_M095_noSelec_151024/Paxil_M095_noSelec_151024.PLINK.bed +
+Paxil_M095_noSelec_151024/Paxil_M095_noSelec_151024.PLINK.bim +
+Paxil_M095_noSelec_151024/Paxil_M095_noSelec_151024.PLINK.fam written.
+
+End time: Tue Oct 15 16:39:07 2024

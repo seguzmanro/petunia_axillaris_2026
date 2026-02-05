@@ -1,0 +1,1 @@
+populations -V ../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz -M ../../Paxil_PopGroupMap.STACKS.txt -O Paxil_M095_PutatNeutral --threads 16
