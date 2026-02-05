@@ -10,3 +10,4 @@
 stats/
 screenlog.0
 *.vcf
+.DS_Store
