@@ -1,0 +1,76 @@
+import os
+
+configfile: "config.yaml"
+
+OUTDIR = config["output_dir"]
+PREFIX = config["prefix"]
+STAIRWAY_PATH = config['stairwayplot_path']
+
+# Helper function to dynamically evaluate the checkpoint
+def get_stairbuilder_outputs(wildcards):
+    # 1. This pauses Snakemake until 'blueprint_gen' is finished
+    checkpoint_output = checkpoints.blueprint_gen.get().output[0]
+    
+    # 2. Glob the directory to find all the generated .blueprint files
+    samples = glob_wildcards(os.path.join(checkpoint_output, "{sample}.blueprint")).sample
+    
+    # 3. Request the corresponding .sh files from the stairbuilder rule
+    return expand(f"{OUTDIR}/{{sample}}/{{sample}}.final.summary", sample=samples)
+
+rule all:
+    input:
+        # Pass the helper function directly to the input
+        get_stairbuilder_outputs
+
+checkpoint blueprint_gen:
+    input:
+        vcf = config['vcf'],
+        popmap = config['popmap']
+    output:
+        # Force the R script to write inside a dedicated folder for clean globbing
+        dir = directory(f"{OUTDIR}")
+    params:
+        mu = config['mu'],
+        outdir = f"{OUTDIR}",
+        prefix = PREFIX,
+        stairway_path = STAIRWAY_PATH,
+        projection = config['projection']
+    shell:
+        """
+        mkdir -p {output.dir}
+        Rscript make_stairway_blueprint.R --vcf {input.vcf} \
+                                           --prefix {params.prefix} \
+                                           --projection {params.projection} \
+                                           --popmap {input.popmap} \
+                                           --mu {params.mu} \
+                                           --outdir {params.outdir} \
+                                           --stairway_plot_dir {params.stairway_path}
+        """
+
+rule stairbuilder:
+    input:
+        bp = f"{OUTDIR}/{{sample}}.blueprint"
+    output:
+        sh = f"{OUTDIR}/{{sample}}.blueprint.sh"
+    params:
+         # Ensure this is an absolute path in your config.yaml!
+         stairway_path = STAIRWAY_PATH
+    shell:
+        """
+        java -cp {params.stairway_path} Stairbuilder {input.bp}
+        """
+
+rule run_and_organize_stairway:
+    """
+    Runs the analysis AND immediately moves the results to the final folder.
+    This prevents 'stray' folders from cluttering the working directory.
+    """
+    input:
+        bp = f"{OUTDIR}/{{sample}}.blueprint",
+        sh = f"{OUTDIR}/{{sample}}.blueprint.sh"
+    output:
+        f"{OUTDIR}/{{sample}}/{{sample}}.final.summary"
+    shell:
+        """
+        bash {input.sh}
+        """
