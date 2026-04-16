@@ -46,10 +46,10 @@ parse_cli_args <- function() {
                       help="Comma-separated breakpoints for each try (e.g. '10,20,30'). Default is dynamically calculated based on sequence count.")
   parser$add_argument("--ninput", type="integer", default=200,
                       help="Number of input files to be created for each estimation (default: 200)")
-  parser$add_argument("--xrange", type="character", default="0.1,10000",
-                      help="Time range formatted as 'xmin,xmax' (default: 0.1,10000)")
+  parser$add_argument("--xrange", type="character", default="0,0",
+                      help="Time range formatted as 'xmin,xmax' (default: 0,0)")
   parser$add_argument("--yrange", type="character", default="0,0",
-                      help="Ne range formatted as 'xmin,xmax' (default: 0,0)")
+                      help="Ne range formatted as 'ymin,ymax' (default: 0,0)")
   parser$add_argument("--xspacing", type="double", default=2,
                       help="X axis spacing (default: 2)")
   parser$add_argument("--yspacing", type="double", default=2,
@@ -237,7 +237,7 @@ build_blueprint_content <- function(popid, nseq, L, sfs, nrand, args) {
   lines <- c(lines, "#plot setting")
   lines <- c(lines, paste("plot_title:", popid, "# title of the plot"))
   lines <- c(lines, paste("xrange:", paste(args$xrange, collapse = ","), "# Time (1k year) range; format: xmin,xmax; \"0,0\" for default"))
-  lines <- c(lines, paste("yrange:", paste(args$yrange, collapse = ","), "# Ne (1k individual) range; format: xmin,xmax; \"0,0\" for default"))
+  lines <- c(lines, paste("yrange:", paste(args$yrange, collapse = ","), "# Ne (1k individual) range; format: ymin,ymax; \"0,0\" for default"))
   lines <- c(lines, paste("xspacing:", args$xspacing, "# X axis spacing"))
   lines <- c(lines, paste("yspacing:", args$yspacing, "# Y axis spacing"))
   lines <- c(lines, paste("fontsize:", args$fontsize, "# Font size"))

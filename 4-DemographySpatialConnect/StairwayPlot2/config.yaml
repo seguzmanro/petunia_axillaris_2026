@@ -1,9 +1,9 @@
-vcf: "../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz"
-popmap: "../../Paxil_PopGroupMap2.csv"
+vcf: "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noMono.recode.vcf.gz"
+popmap: "../../Paxil_PopGroupMap3.csv"
 mu: 1e-8
 projection: "conservative"
-prefix: "Paxil_M095_PutatNeutral"
+prefix: "Paxil_M095_noMono_inclPaxil1001"
 
-output_dir: "results_PutatNeutral_projCONSERVAT"
+output_dir: "results_noMono_inclPaxil1001_projCONSERVAT"
 
 stairwayplot_path: "/home/lem/stairway_plot_v2.1.3/stairway_plot_es"

@@ -67,7 +67,7 @@ print(getwd())
 # load('Paxil_M095_hierfstat_Pops')
 
 ## load VCF:
-Paxil = read.vcfR("../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz")
+Paxil = read.vcfR("../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz")
 ## Convert VCF to genind object:
 GI_Paxil = vcfR2genind(Paxil)
 ## Define and assign individuals to populations:
