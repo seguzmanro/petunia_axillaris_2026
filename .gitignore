@@ -12,3 +12,5 @@ screenlog.0
 *.vcf
 .DS_Store
 Rplots.pdf
+
+4-DemographySpatialConnect/StairwayPlot2/*/
