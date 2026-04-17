@@ -1,0 +1,37 @@
+configfile: "champion_config.yaml"
+
+rule all:
+    input:
+        config["output_csv"],
+        config["rankings_out"],
+        config["dendrogram_plot"]
+
+rule select_environ_vars:
+    input:
+        popmap = config["popmap"],
+        env_table = config["env_table"],
+        script = "champion_EnvironVars_Selection.R"
+    output:
+        csv = config["output_csv"],
+        dendro = config["dendrogram_plot"],
+        rankings = config["rankings_out"]
+    params:
+        bayescenv_txt_dir = directory(config["out_dir_txt"]),
+        num_clusters_soil = config.get("num_clusters_soil", 2),
+        num_clusters_atmos = config.get("num_clusters_atmos", 3),
+        num_champions_per_cluster = config.get("num_champions_per_cluster", 1),
+        champions_arg = lambda wildcards: config.get("champions", "auto") if isinstance(config.get("champions", "auto"), str) else " ".join(config.get("champions", []))
+    shell:
+        """
+        Rscript {input.script} \
+            --popmap {input.popmap} \
+            --env_table {input.env_table} \
+            --output {output.csv} \
+            --out_dir_txt {params.bayescenv_txt_dir} \
+            --dendrogram_plot {output.dendro} \
+            --rankings_out {output.rankings} \
+            --num_clusters_soil {params.num_clusters_soil} \
+            --num_clusters_atmos {params.num_clusters_atmos} \
+            --num_champions_per_cluster {params.num_champions_per_cluster} \
+            --champions {params.champions_arg}
+        """

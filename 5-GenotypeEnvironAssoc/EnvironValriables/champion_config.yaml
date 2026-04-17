@@ -1,0 +1,13 @@
+popmap: "../../Paxil_PopGroupMap.csv"
+env_table: "Paxil_EnvironVars.csv"
+output_csv: "champion_EnvironVars_Selected_Distances.csv"
+out_dir_txt: "../Bayescenv_champion"
+dendrogram_plot: "champion_dendrogram.pdf"
+rankings_out: "champion_cluster_rankings.csv"
+num_clusters_soil: 5
+num_clusters_atmos: 6
+num_champions_per_cluster: 1
+
+# The champions can be set to "auto" for PCA-based selection
+# OR provided as an explicit list like ["Bio6", "Bio12", "wc2_elev", "Alt_topoWet"]
+champions: "auto"

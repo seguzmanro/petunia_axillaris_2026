@@ -1,0 +1,23 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        config["output_csv"]
+
+rule select_environ_vars:
+    input:
+        popmap = config["popmap"],
+        env_table = config["env_table"],
+        script = "EnvironVars_Selection.R"
+    output:
+        csv = config["output_csv"],
+    params:
+        bayescenv_txt_dir = directory(config["out_dir_txt"])
+    shell:
+        """
+        Rscript {input.script} \
+            --popmap {input.popmap} \
+            --env_table {input.env_table} \
+            --output {output.csv} \
+            --out_dir_txt {params.bayescenv_txt_dir}
+        """

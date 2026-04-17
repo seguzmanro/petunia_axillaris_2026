@@ -1,8 +1,17 @@
+library(argparse)
 library(dplyr)
 library(tidyr)
 library(fuzzySim)
 library(purrr)
 library(terra)
+
+parser <- ArgumentParser(description='Generalize Environmental variable selection')
+parser$add_argument('--popmap', type="character", required=TRUE, help='Path to the population map CSV')
+parser$add_argument('--env_table', type="character", required=TRUE, help='Path to the environmental table CSV')
+parser$add_argument('--output', type="character", required=TRUE, help='Output file name for the selected variables distances')
+parser$add_argument('--out_dir_txt', type="character", default=NULL, help='Optional directory to write Bayescenv environmental variables txt files')
+
+args <- parser$parse_args()
 
 pairwise_df <- function(mat) {
   as.data.frame(as.table(mat)) %>%
@@ -22,14 +31,12 @@ pairwise_df <- function(mat) {
     )
 }
 
-setwd('5-GenotypeEnvironAssoc/EnvironValriables/')
-
 eco_var_table <- read.csv(
-  "Paxil_EnvironVars.csv",
+  args$env_table,
   stringsAsFactors = TRUE
 )
 
-paxil_popmap <- read.csv('../../Paxil_PopGroupMap.csv')
+paxil_popmap <- read.csv(args$popmap)
 
 rownames(eco_var_table) <- eco_var_table$Pop
 eco_var_table <- eco_var_table[paxil_popmap[,'Pop'][!duplicated(paxil_popmap[,'Pop'])],]
@@ -78,8 +85,6 @@ dist_scaled <- dist_wide %>%
     )
   )
 
-
-
 soil_pairwise_dist <- dist_scaled[,grepl('mean|geog',names(dist_scaled))]
 
 soil_selec_vars_VIF <- corSelect(soil_pairwise_dist, 
@@ -89,15 +94,13 @@ soil_selec_vars_VIF <- corSelect(soil_pairwise_dist,
 
 soil_selec_vars_VIF$remaining.multicollinearity
 
-
 atmos_pairwise_dist <- dist_scaled[,grepl('CM|geog',names(dist_scaled))]
 atmos_selec_vars_VIF <- corSelect(atmos_pairwise_dist, 
                                               sp.cols = length(names(atmos_pairwise_dist)), 
                                               var.cols = 1:(length(names(atmos_pairwise_dist))-1), 
-                                              method='pearson', select='VIF', coeff = FALSE,cor.thresh=0.01)
+                                              method='pearson', select='VIF', coeff = FALSE, cor.thresh=0.1)
 
 atmos_selec_vars_VIF$remaining.multicollinearity
-
 
 selected_vars_dist <- dist_scaled[c(
     'pop1','pop2','geog',
@@ -113,37 +116,45 @@ selected_vars_raw <- eco_var_table[c(
     soil_selec_vars_VIF$selected.vars
 )]
 
-write.csv(selected_vars_dist, 'EnvironVars_Selected_Distances.csv', row.names=FALSE, quote=FALSE)
+write.csv(selected_vars_dist, args$output, row.names=FALSE, quote=FALSE)
 
-env_dist_to_mean <- selected_vars_raw %>%
-  mutate(
-    across(
-      -c(Pop, lon, lat,),
-      ~ (.x - mean(.x, na.rm = TRUE))
+cat("Successfully selected environmental variables and wrote to", args$output, "\n")
+
+if (!is.null(args$out_dir_txt)) {
+  if (!dir.exists(args$out_dir_txt)) {
+    dir.create(args$out_dir_txt, recursive = TRUE, showWarnings = FALSE)
+  }
+
+  env_dist_to_mean <- selected_vars_raw %>%
+    mutate(
+      across(
+        -c(Pop, lon, lat),
+        ~ (.x - mean(.x, na.rm = TRUE))
+      )
     )
-  )
 
-env_dist_to_mean <- env_dist_to_mean %>%
-  mutate(Pop = selected_vars_raw$Pop) %>%
-  relocate(Pop)
+  env_dist_to_mean <- env_dist_to_mean %>%
+    mutate(Pop = selected_vars_raw$Pop) %>%
+    relocate(Pop)
 
-env_dist_scaled <- env_dist_to_mean %>% 
-  mutate(
-    across(
-      -c(Pop, lon, lat),
-      ~ as.numeric(abs(scale(.x)))
+  env_dist_scaled <- env_dist_to_mean %>% 
+    mutate(
+      across(
+        -c(Pop, lon, lat),
+        ~ as.numeric(abs(scale(.x)))
+      )
     )
+
+  vars_to_write <- setdiff(
+    names(env_dist_scaled),
+    c("Pop", "lon", "lat")
   )
 
-vars_to_write <- setdiff(
-  names(env_dist_scaled),
-  c("Pop", "lon", "lat")
-)
-
-for (v in vars_to_write) {
-  write(
-    x = env_dist_scaled[[v]],
-    file = paste0('../Bayescenv/', v, ".txt"),
-    ncolumns = length(env_dist_scaled[[v]])
-  )
+  for (v in vars_to_write) {
+    write(
+      x = env_dist_scaled[[v]],
+      file = file.path(args$out_dir_txt, paste0(v, ".txt")),
+      ncolumns = length(env_dist_scaled[[v]])
+    )
+  }
 }
