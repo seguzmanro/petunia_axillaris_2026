@@ -1,0 +1,18 @@
+# GLMM Analysis Configuration
+
+# Define the output prefix (can include a subdirectory, e.g., "results/run_1")
+out_prefix: "results/GLMM_champion"
+
+# Input Files
+vcf: "../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz"
+popmap: "../../Paxil_PopGroupMap.csv"
+env_dist: "../EnvironValriables/EnvironVars_Selected_Distances.csv"
+
+# Execution Flags
+run_indiv_loci: false
+
+# GLMM MCMC Parameters
+threads: 6
+n_ger: 2000000
+burnin: 500000
+thin: 750

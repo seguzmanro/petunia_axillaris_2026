@@ -1,0 +1,49 @@
+configfile: "config.yaml"
+
+rule all:
+    input:
+        expand("{out_prefix}_BEDASSLE_RES_CI.csv", out_prefix=config["out_prefix"])
+
+rule run_bedassle:
+    input:
+        vcf = config["vcf"],
+        popmap = config["popmap"],
+        env_dist = config["env_dist"]
+    output:
+        ci_res = "{out_prefix}_BEDASSLE_RES_CI.csv"
+    params:
+        out_prefix = "{out_prefix}",
+        ngen = config.get("ngen", 2000000),
+        printfreq = config.get("printfreq", 10000),
+        savefreq = config.get("savefreq", 100000),
+        samplefreq = config.get("samplefreq", 250),
+        delta = config.get("delta", 1e-20),
+        aD_stp = config.get("aD_stp", 0.075),
+        aE_stp = config.get("aE_stp", 0.05),
+        a2_stp = config.get("a2_stp", 0.025),
+        phi_stp = config.get("phi_stp", 30),
+        thetas_stp = config.get("thetas_stp", 0.2),
+        mu_stp = config.get("mu_stp", 0.35)
+    threads: config.get("threads", 4)
+    log:
+        "{out_prefix}_bedassle.log"
+    shell:
+        """
+        Rscript bedassle_script.R \
+            --vcf {input.vcf} \
+            --popmap {input.popmap} \
+            --env_dist {input.env_dist} \
+            --out_prefix {params.out_prefix} \
+            --ngen {params.ngen} \
+            --printfreq {params.printfreq} \
+            --savefreq {params.savefreq} \
+            --samplefreq {params.samplefreq} \
+            --delta {params.delta} \
+            --aD_stp {params.aD_stp} \
+            --aE_stp {params.aE_stp} \
+            --a2_stp {params.a2_stp} \
+            --phi_stp {params.phi_stp} \
+            --thetas_stp {params.thetas_stp} \
+            --mu_stp {params.mu_stp} \
+            --threads {threads} &> {log}
+        """

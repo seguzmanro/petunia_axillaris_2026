@@ -1,0 +1,23 @@
+# BEDASSLE Analysis Configuration
+
+# Define the output prefix
+out_prefix: "results/BEDASSLE_champion"
+
+# Input Files
+vcf: "../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz"
+popmap: "../../Paxil_PopGroupMap.csv"
+env_dist: "../EnvironValriables/EnvironVars_Selected_Distances.csv"
+
+# BEDASSLE MCMC Execution Parameters
+threads: 6
+ngen: 2000000
+printfreq: 10000
+savefreq: 100000
+samplefreq: 250
+delta: 1e-20
+aD_stp: 0.075
+aE_stp: 0.05
+a2_stp: 0.025
+phi_stp: 30
+thetas_stp: 0.2
+mu_stp: 0.35

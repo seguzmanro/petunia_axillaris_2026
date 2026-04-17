@@ -1,0 +1,47 @@
+configfile: "config.yaml"
+
+# Dynamically gather expected outputs
+fst_dics = expand("{out_prefix}_fst_DICs_res.csv", out_prefix=config["out_prefix"])
+indiv_dics = expand("{out_prefix}_indiv_loci_DICs.RData", out_prefix=config["out_prefix"]) if config.get("run_indiv_loci", False) else []
+expected_files = fst_dics + indiv_dics
+
+rule all:
+    input: expected_files
+
+def get_glmm_outputs():
+    outs = {
+        "fst_models": "{out_prefix}_fst_models.RData",
+        "fst_res": "{out_prefix}_fst_DICs_res.csv"
+    }
+    if config.get("run_indiv_loci", False):
+        outs["indiv_res"] = "{out_prefix}_indiv_loci_DICs.RData"
+    return outs
+
+rule run_glmm:
+    input:
+        vcf = config["vcf"],
+        popmap = config["popmap"],
+        env_dist = config["env_dist"]
+    output:
+        **get_glmm_outputs()
+    params:
+        indiv_loci = "--indiv_loci" if config.get("run_indiv_loci", False) else "",
+        n_ger = config.get("n_ger", 2000000),
+        burnin = config.get("burnin", 500000),
+        thin = config.get("thin", 750)
+    threads: config.get("threads", 4)
+    log:
+        "{out_prefix}_glmm.log"
+    shell:
+        """
+        Rscript glmm_script.R \
+            --vcf {input.vcf} \
+            --popmap {input.popmap} \
+            --env_dist {input.env_dist} \
+            --out_prefix {wildcards.out_prefix} \
+            --n_ger {params.n_ger} \
+            --burnin {params.burnin} \
+            --thin {params.thin} \
+            --threads {threads} \
+            {params.indiv_loci} &> {log}
+        """

@@ -181,10 +181,13 @@ if (length(missing_vars) > 0) {
 }
 
 # 6. Pairwise distance outputs
-distmatrices <- c(
-  map(environ_only[, champion_vars, drop=FALSE], ~ as.matrix(dist(.x, method = "euclidean"))),
-  list(geog = as.matrix(terra::distance(geog)))
-)
+# First, scale the raw champion environmental variables
+environ_scaled <- as.data.frame(scale(environ_only[, champion_vars, drop=FALSE]))
+distmatrices <- map(environ_scaled, ~ as.matrix(dist(.x, method = "euclidean")))
+
+# Geographic distance in Km (terra::distance on lon/lat returns meters)
+geog_km <- as.matrix(terra::distance(geog)) / 1000
+distmatrices <- c(distmatrices, list(geog = geog_km))
 
 distmatrices <- map(
   distmatrices,
@@ -198,22 +201,14 @@ all_distances <- imap_dfr(
   ~ mutate(.x, distance_type = .y)
 )
 
-dist_wide <- all_distances %>%
+selected_vars_dist <- all_distances %>%
   pivot_wider(
     names_from  = distance_type,
     values_from = distance
   ) %>%
   arrange(pop1, pop2)
 
-dist_scaled <- dist_wide %>%
-  mutate(
-    across(
-      -c(pop1, pop2),
-      ~ as.numeric(scale(.x))
-    )
-  )
-
-selected_vars_dist <- dist_scaled[, c('pop1', 'pop2', 'geog', champion_vars)]
+selected_vars_dist <- selected_vars_dist[, c('pop1', 'pop2', 'geog', champion_vars)]
 write.csv(selected_vars_dist, args$output, row.names=FALSE, quote=FALSE)
 cat("Successfully wrote scaled pairwise distances to", args$output, "\n")
 
