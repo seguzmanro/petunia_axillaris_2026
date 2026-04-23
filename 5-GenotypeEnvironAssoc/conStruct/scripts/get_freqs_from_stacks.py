@@ -9,7 +9,7 @@ def main():
     args = parser.parse_args()
 
     # Read the sumstats file, skipping comment lines starting with '#'
-    stacks_res = pd.read_csv(args.sumstats, sep='\t', comment='#')
+    stacks_res = pd.read_csv(args.sumstats, sep='\t', comment='#', header=0)
     
     # In older stacks versions or depending on header structure, Locus ID column might be 'Locus ID' or '# Locus ID'
     locus_col = '# Locus ID' if '# Locus ID' in stacks_res.columns else 'Locus ID'
