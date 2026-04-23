@@ -21,7 +21,7 @@ def main():
     
     # Save to csv. index_label=False prevents adding a header for the index column, 
     # making it compatible with R's read.csv(..., row.names=1)
-    freqs.to_csv(args.out, index_label=False)
+    freqs.to_csv(args.out, index_label='Pop')
 
 if __name__ == '__main__':
     main()
