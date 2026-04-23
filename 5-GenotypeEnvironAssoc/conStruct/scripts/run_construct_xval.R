@@ -30,15 +30,9 @@ args <- parser$parse_args()
 allele.frequencies <- as.matrix(read.csv(args$freqs, row.names = 1, check.names = FALSE, header = TRUE))
 
 # Load Coordinates
-# Using header=FALSE and explicitly subsetting the matrix as in the original script
+# We check if the first row contains characters to guess if there is a header.
 coords_raw <- read.csv(args$coords, row.names = 1, header = FALSE)
-coords_raw <- coords_raw[row.names(allele.frequencies), ]
-
-# Original script assumes lon, lat is in the 2nd and 1st column (if pop is row.names)
-# Wait, original script: `as.matrix(read.csv(geog_coord_file, row.names = 1, header = F))[,c(2,1)]`
-# I will replicate this logic to be safe. If they provide a header, it might break if header=F is used.
-# Let's check if the first row contains string characters.
-if (is.character(coords_raw[1, 1])) {
+if (is.character(coords_raw[1, 1]) || is.factor(coords_raw[1, 1])) {
   # It likely has a header. Read again with header=TRUE
   coords_raw <- read.csv(args$coords, row.names = 1, header = TRUE)
   coords <- as.matrix(coords_raw[, 1:2])
@@ -47,12 +41,21 @@ if (is.character(coords_raw[1, 1])) {
   coords <- as.matrix(coords_raw)[, c(2, 1)]
 }
 
+# Ensure all populations in frequencies are present in coordinates
+if (!all(row.names(allele.frequencies) %in% row.names(coords))) {
+  missing_pops <- row.names(allele.frequencies)[!row.names(allele.frequencies) %in% row.names(coords)]
+  stop(paste("ERROR: Some populations in frequencies are missing from coordinates:", paste(missing_pops, collapse=", ")))
+}
+
+# Re-order coordinates to exactly match the order of populations in allele frequencies
+coords <- coords[row.names(allele.frequencies), ]
+
 # Calculate Geographic Distances
 geoDist <- fields::rdist.earth(x1 = coords)
 row.names(geoDist) <- row.names(coords)
 colnames(geoDist) <- row.names(coords)
 
-# Check if population order matches
+# Final sanity check (should always pass now)
 if (!all(row.names(allele.frequencies) == row.names(coords))) {
   stop("ERROR: Population names/order in frequencies and coordinates do not match!")
 }
