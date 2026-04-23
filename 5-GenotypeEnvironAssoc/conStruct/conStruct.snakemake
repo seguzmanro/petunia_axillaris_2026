@@ -1,0 +1,104 @@
+import os
+
+configfile: "config.yaml"
+
+OUT_PREFIX = config["out_prefix"]
+SUMSTATS = config["sumstats"]
+COORDS = config["coords"]
+
+# Determine what to run based on the mutually exclusive run_mode
+TARGETS = []
+
+# 1. Always generate allele frequencies first
+FREQS = f"{OUT_PREFIX}_freqs.csv"
+
+if config["run_mode"] == "xval":
+    TARGETS.append(f"{OUT_PREFIX}_xval_plot.svg")
+elif config["run_mode"] == "models":
+    for k in config["models"]["k_values"]:
+        if config["models"]["spatial"]:
+            TARGETS.append(f"{OUT_PREFIX}_sp_K{k}_conStruct.RData")
+        if config["models"]["nonspatial"]:
+            TARGETS.append(f"{OUT_PREFIX}_nsp_K{k}_conStruct.RData")
+else:
+    raise ValueError("config['run_mode'] must be either 'xval' or 'models'")
+
+rule all:
+    input:
+        TARGETS
+
+rule extract_freqs:
+    input:
+        sumstats=SUMSTATS
+    output:
+        freqs=FREQS
+    log:
+        f"{OUT_PREFIX}_logs/extract_freqs.log"
+    shell:
+        "python3 scripts/get_freqs_from_stacks.py "
+        "--sumstats {input.sumstats} "
+        "--out {output.freqs} > {log} 2>&1"
+
+rule construct_xval:
+    input:
+        freqs=FREQS,
+        coords=COORDS
+    output:
+        sp_res=f"{OUT_PREFIX}_sp_xval_results.txt",
+        nsp_res=f"{OUT_PREFIX}_nsp_xval_results.txt"
+    params:
+        prefix=OUT_PREFIX,
+        min_k=config["xval"]["min_k"],
+        max_k=config["xval"]["max_k"],
+        n_reps=config["xval"]["n_reps"],
+        train_prop=config["xval"]["train_prop"],
+        n_iter=config["xval"]["n_iter"]
+    threads:
+        config["xval"]["threads"]
+    log:
+        f"{OUT_PREFIX}_logs/construct_xval.log"
+    shell:
+        "Rscript scripts/run_construct_xval.R "
+        "--freqs {input.freqs} "
+        "--coords {input.coords} "
+        "--prefix {params.prefix} "
+        "--min_k {params.min_k} "
+        "--max_k {params.max_k} "
+        "--n_reps {params.n_reps} "
+        "--train_prop {params.train_prop} "
+        "--n_iter {params.n_iter} "
+        "--threads {threads} > {log} 2>&1"
+
+rule plot_xval:
+    input:
+        sp_res=f"{OUT_PREFIX}_sp_xval_results.txt",
+        nsp_res=f"{OUT_PREFIX}_nsp_xval_results.txt"
+    output:
+        plot=f"{OUT_PREFIX}_xval_plot.svg"
+    log:
+        f"{OUT_PREFIX}_logs/plot_xval.log"
+    shell:
+        "Rscript scripts/plot_construct_xval.R "
+        "--sp {input.sp_res} "
+        "--nsp {input.nsp_res} "
+        "--out {output.plot} > {log} 2>&1"
+
+rule construct_model:
+    input:
+        freqs=FREQS,
+        coords=COORDS
+    output:
+        rdata=f"{OUT_PREFIX}_{{model_type}}_K{{k}}_conStruct.RData"
+    params:
+        prefix=f"{OUT_PREFIX}_{{model_type}}_K{{k}}",
+        n_iter=config["models"]["n_iter"]
+    log:
+        f"{OUT_PREFIX}_logs/construct_{{model_type}}_K{{k}}.log"
+    shell:
+        "Rscript scripts/run_construct_model.R "
+        "--freqs {input.freqs} "
+        "--coords {input.coords} "
+        "--prefix {params.prefix} "
+        "--K {wildcards.k} "
+        "--model_type {wildcards.model_type} "
+        "--n_iter {params.n_iter} > {log} 2>&1"

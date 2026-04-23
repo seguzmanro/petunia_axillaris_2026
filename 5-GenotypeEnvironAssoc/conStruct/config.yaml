@@ -1,0 +1,31 @@
+# conStruct Analysis Configuration
+
+# Define the output directory and prefix
+out_prefix: "results/conStruct_run"
+
+# Execution Mode
+# Set to either "xval" (cross-validation) OR "models" (individual models).
+# These operations are mutually exclusive.
+run_mode: "xval"
+
+# Input Files
+# Note: Ensure these paths point to your actual data.
+sumstats: "../../3-PopGenStruct/STACKS/Paxil_M095_PutatNeutral/Paxil_M095_PutatNeutral.recode.p.sumstats.tsv"
+coords: "../EnvironValriables/Paxil_EnvironVars.csv"
+
+# Cross-Validation Configuration
+xval:
+  min_k: 2
+  max_k: 8
+  n_reps: 8
+  train_prop: 0.9
+  n_iter: 1000
+  threads: 8
+
+# Individual Models Configuration
+models:
+  spatial: true
+  nonspatial: true
+  # List of K values to run
+  k_values: [1, 2, 3, 4, 5, 6, 7, 8]
+  n_iter: 10000000
