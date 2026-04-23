@@ -1,15 +1,15 @@
 # BEDASSLE Analysis Configuration
 
 # Define the output prefix
-out_prefix: "results/BEDASSLE_champion"
+out_prefix: "results/BEDASSLE_champion_noLD"
 
 # Input Files
-vcf: "../../2-OutlierDetection/Paxil_M095_PutatNeutral.recode.vcf.gz"
+vcf: "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz"
 popmap: "../../Paxil_PopGroupMap.csv"
-env_dist: "../EnvironValriables/EnvironVars_Selected_Distances.csv"
+env_dist: "../EnvironValriables/champion_EnvironVars_Selected_Distances.csv"
 
 # BEDASSLE MCMC Execution Parameters
-threads: 6
+threads: 14
 ngen: 2000000
 printfreq: 10000
 savefreq: 100000
