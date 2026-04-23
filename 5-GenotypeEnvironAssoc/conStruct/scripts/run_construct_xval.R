@@ -27,7 +27,7 @@ parser$add_argument("--threads", type = "integer", default = 1, help = "Number o
 args <- parser$parse_args()
 
 # Load Allele Frequencies
-allele.frequencies <- as.matrix(read.csv(args$freqs, row.names = 1, check.names = FALSE))
+allele.frequencies <- as.matrix(read.csv(args$freqs, row.names = 1, check.names = FALSE, header = TRUE))
 
 # Load Coordinates
 # Using header=FALSE and explicitly subsetting the matrix as in the original script
