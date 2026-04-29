@@ -361,18 +361,18 @@ main <- function() {
   # Example configurations
   
   # Uncomment this for Bayescan
-  # config$analysis_type <- "bayescan"
-  # config$working_dir <- "./"
-  # config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf"
-  # config$results_dir <- "."
-  # config$fst_pattern <- "_fst\\.txt$"
-  # config$fdr_threshold <- 0.01
+  config$analysis_type <- "bayescan"
+  config$working_dir <- "./"
+  config$vcf_file <- "../../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz"
+  config$results_dir <- "."
+  config$fst_pattern <- "_fst\\.txt$"
+  config$fdr_threshold <- 0.01
   
   # Uncomment this for BayescEnv (adjust paths as needed)
   # config$analysis_type <- "bayescenv"
-  # config$working_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv/"
+  # config$working_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv_champion/"
   # config$vcf_file <- "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz"
-  # config$results_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv/Results"
+  # config$results_dir <- "../../5-GenotypeEnvironAssoc/Bayescenv_champion/Results"
   # config$fst_pattern <- "_fst\\.txt$"  # Adjust if filenames are different
   # config$fdr_threshold <- 0.01
   

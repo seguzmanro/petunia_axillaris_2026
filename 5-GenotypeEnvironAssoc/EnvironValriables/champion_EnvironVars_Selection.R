@@ -220,8 +220,22 @@ if (!is.null(args$out_dir_txt)) {
   
   final_glmm_data <- eco_var_table[, c("Pop", "lon", "lat", champion_vars)]
   
+
   final_glmm_scaled <- final_glmm_data %>%
-    mutate(across(all_of(champion_vars), ~ as.numeric(scale(.x))))
+    mutate(
+      across(
+        .cols = all_of(champion_vars),
+        .fns = ~ {
+          ref_val <- if (grepl("wc2_elev", cur_column())) { # Altitude variables
+            0                                               # Reference = sea level
+          } else {
+            mean(.x, na.rm = TRUE)                          # Reference = population mean
+          }
+          # Compute signed contrast and standardize
+          as.numeric((.x - ref_val) / sd(.x, na.rm = TRUE))
+        }
+      )
+    )
 
   for (v in champion_vars) {
     write(
