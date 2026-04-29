@@ -1,7 +1,7 @@
 # conStruct Analysis Configuration
 
 # Define the output directory and prefix
-out_prefix: "results/conStruct_Paxil_PutatNeutral_K1"
+out_prefix: "results/conStruct_Paxil_PutatOutlier"
 
 # Execution Mode
 # Set to either "xval" (cross-validation) OR "models" (individual models).
@@ -10,17 +10,17 @@ run_mode: "xval"
 
 # Input Files
 # Note: Ensure these paths point to your actual data.
-sumstats: "../../3-PopGenStruct/STACKS/Paxil_M095_PutatNeutral/Paxil_M095_PutatNeutral.recode.p.sumstats.tsv"
+sumstats: "../../3-PopGenStruct/STACKS/Paxil_M095_PutatOutlier/Paxil_M095_PutatOutlier.recode.p.sumstats.tsv"
 coords: "../EnvironValriables/Paxil_EnvironVars.csv"
 
 # Cross-Validation Configuration
 xval:
   min_k: 1
-  max_k: 1
+  max_k: 8
   n_reps: 32
   train_prop: 0.7
   n_iter: 500000
-  threads: 32
+  threads: 64
 
 # Individual Models Configuration
 models:
