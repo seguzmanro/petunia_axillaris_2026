@@ -1,7 +1,7 @@
 # conStruct Analysis Configuration
 
 # Define the output directory and prefix
-out_prefix: "results/conStruct_Paxil_PutatNeutral"
+out_prefix: "results/conStruct_Paxil_PutatNeutral_K1"
 
 # Execution Mode
 # Set to either "xval" (cross-validation) OR "models" (individual models).
