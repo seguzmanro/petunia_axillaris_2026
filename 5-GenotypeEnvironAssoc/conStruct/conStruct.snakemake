@@ -75,13 +75,16 @@ rule plot_xval:
         nsp_res=f"{OUT_PREFIX}_nsp_xval_results.txt"
     output:
         plot=f"{OUT_PREFIX}_xval_plot.svg"
+    params:
+        k_values=range(config["xval"]["min_k"], config["xval"]["max_k"] + 1)
     log:
         f"{OUT_PREFIX}_logs/plot_xval.log"
     shell:
         "Rscript scripts/plot_construct_xval.R "
         "--sp {input.sp_res} "
         "--nsp {input.nsp_res} "
-        "--out {output.plot} > {log} 2>&1"
+        "--out {output.plot} "
+        "--k_values " + " ".join(map(str, params.k_values)) + " > {log} 2>&1"
 
 rule construct_model:
     input:

@@ -17,8 +17,11 @@ parser <- ArgumentParser(description="Plot conStruct cross-validation results")
 parser$add_argument('--sp', required=TRUE, help='Path to spatial cross-validation results txt')
 parser$add_argument('--nsp', required=TRUE, help='Path to non-spatial cross-validation results txt')
 parser$add_argument('--out', required=TRUE, help='Output SVG file')
+parser$add_argument('--k_values', required=TRUE, nargs='+', type='integer', help='K values used in the analysis')
 
 args <- parser$parse_args()
+
+k_values <- args$k_values
 
 sp.results <- as.matrix(read.table(args$sp, header = TRUE, stringsAsFactors = FALSE))
 nsp.results <- as.matrix(read.table(args$nsp, header = TRUE, stringsAsFactors = FALSE))
@@ -34,22 +37,32 @@ plot(rowMeans(sp.results),
      pch=19, col="blue",
      ylab="predictive accuracy", xlab="values of K",
      ylim=range(sp.results, nsp.results),
+     xaxt="n",
      main="Cross-validation results (All K)")
+axis(side=1, at=1:length(k_values), labels=k_values)
 points(rowMeans(nsp.results), col="green", pch=19)
 legend("bottomright", legend=c("Spatial", "Non-Spatial"), col=c("blue", "green"), pch=19)
 
-# Plot 2: Zoomed in (excluding K=1 and K=2 if possible, to match original script's intent)
-max_k <- nrow(sp.results)
-if (max_k >= 4) {
-    start_k <- 3
-    idx <- start_k:max_k
-    
+# Plot 2: Zoomed in (excluding K=1 and K=2, or K=2 only if K=1 not present)
+n_k <- length(k_values)
+has_k1 <- 1 %in% k_values
+has_k2 <- 2 %in% k_values
+exclude <- c()
+if (has_k2) {
+    exclude <- c(exclude, which(k_values == 2))
+    if (has_k1) {
+        exclude <- c(exclude, which(k_values == 1))
+    }
+}
+idx <- setdiff(1:n_k, exclude)
+
+if (length(idx) > 1) {
     plot(rowMeans(sp.results[idx, ]),
          pch=19, col="blue",
          ylab="predictive accuracy", xlab="values of K",
          ylim=range(sp.CIs[, idx], nsp.CIs[, idx]),
          xaxt="n",
-         main=paste0("Cross-validation results (K > ", start_k - 1, ")"))
+         main=paste0("Cross-validation results (K > ", min(k_values[idx]) - 1, ")"))
          
     segments(x0 = 1:length(idx),
              y0 = sp.CIs[1, idx],
@@ -65,10 +78,9 @@ if (max_k >= 4) {
              y1 = nsp.CIs[2, idx],
              col = "green", lwd=2)
              
-    axis(side=1, at=1:length(idx), labels = FALSE)
-    text(x=1:length(idx), par("usr")[3], labels = idx, pos = 1, xpd = TRUE, offset = 1.5)
+    axis(side=1, at=1:length(idx), labels=k_values[idx])
 } else {
-    plot(1, type="n", axes=FALSE, xlab="", ylab="", main="Zoomed plot skipped (max K < 4)")
+    plot(1, type="n", axes=FALSE, xlab="", ylab="", main="Zoomed plot skipped (too few K values after exclusion)")
 }
 
 dev.off()
