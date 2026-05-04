@@ -1,0 +1,4 @@
+popmap: "../../Paxil_PopGroupMap.csv"
+env_table: "Paxil_EnvironVars.csv"
+output_csv: "EnvironVars_Selected_Distances.csv"
+out_dir_txt: "../Bayescenv_champion"
