@@ -15,8 +15,6 @@ Rplots.pdf
 *pdf
 
 .snakemake
-
-4-DemographySpatialConnect/StairwayPlot2/*/
-!4-DemographySpatialConnect/StairwayPlot2/
+__pycache__/
 
 results/
