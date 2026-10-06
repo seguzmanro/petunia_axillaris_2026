@@ -9,7 +9,13 @@ suppressPackageStartupMessages({
   library(parallel)
   library(argparse)
   library(dplyr)
+  library(coda)
+  library(ggmcmc)
 })
+
+script_arg <- grep('^--file=', commandArgs(trailingOnly = FALSE), value = TRUE)
+script_dir <- dirname(normalizePath(sub('^--file=', '', script_arg[1])))
+source(file.path(script_dir, 'bedassle_diagnostics.R'))
 
 # Helper function to convert pairwise distance table to a distance matrix
 dist_vec_to_matrix <- function(pairwise_df, var_name, pop_names) {
@@ -40,13 +46,20 @@ adjust_dist_matrix <- function(mat) {
 
 parser <- ArgumentParser(description='Refactored BEDASSLE R script for Pop Genomics')
 
-parser$add_argument('--vcf', type='character', required=TRUE, help='VCF file')
-parser$add_argument('--popmap', type='character', required=TRUE, help='Population map CSV')
+parser$add_argument('--vcf', type='character', help='VCF file (required for new MCMC runs)')
+parser$add_argument('--popmap', type='character', help='Population map CSV (required for new MCMC runs)')
 parser$add_argument('--env_dist', type='character', required=TRUE, help='CSV file with pairwise geographic and environmental distances')
 parser$add_argument('--out_prefix', type='character', required=TRUE, help='Output prefix')
 
 # MCMC Parameters
-parser$add_argument('--ngen', type='integer', default=2000000, help='Number of MCMC steps')
+parser$add_argument('--ngen', type='integer', default=17000000, help='Total MCMC iterations, including burn-in')
+parser$add_argument('--burnin', type='integer', default=4250000, help='Iterations to exclude before summaries and diagnostics')
+parser$add_argument('--min_saved_states', type='integer', default=50000, help='Minimum post-burn-in saved states for new runs')
+parser$add_argument('--ess_min', type='double', default=400, help='ESS screening threshold; flags do not prove convergence')
+parser$add_argument('--seed', type='integer', default=20261006, help='Base seed; each predictor receives a distinct seed')
+parser$add_argument('--summarize_only', action='store_true', help='Reprocess completed saved chains without running MCMC')
+parser$add_argument('--summary_input_prefix', type='character', help='Saved-chain prefix for summary-only mode')
+parser$add_argument('--no_plots', action='store_true', help='Write numeric diagnostics without PDF reports')
 parser$add_argument('--printfreq', type='integer', default=10000, help='Print frequency')
 parser$add_argument('--savefreq', type='integer', default=100000, help='Save frequency')
 parser$add_argument('--samplefreq', type='integer', default=250, help='Sample frequency')
@@ -62,10 +75,71 @@ parser$add_argument('--threads', type='integer', default=1, help='Number of thre
 
 args <- parser$parse_args()
 
+if (!is.finite(args$ess_min) || args$ess_min <= 0 || args$threads < 1 ||
+    args$seed < 0 || as.double(args$seed) + 10000 > .Machine$integer.max) {
+  stop('Invalid ESS threshold, thread count, or seed.')
+}
+proposal_settings <- unlist(args[c('delta', 'aD_stp', 'aE_stp', 'a2_stp',
+                                   'phi_stp', 'thetas_stp', 'mu_stp')])
+if (any(!is.finite(proposal_settings)) || any(proposal_settings <= 0) || args$printfreq < 1) {
+  stop('Proposal scales, delta and print frequency must be positive.')
+}
+
 out_dir <- dirname(args$out_prefix)
 if (out_dir != "." && !dir.exists(out_dir)) {
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 }
+out_dir <- normalizePath(out_dir)
+args$out_prefix <- file.path(out_dir, basename(args$out_prefix))
+
+# Model order and summary inputs are defined by the environmental-distance table.
+env_dist <- read.csv(args$env_dist, check.names = FALSE)
+if (!all(c('pop1', 'pop2', 'geog') %in% names(env_dist))) stop('Distance table lacks required columns.')
+env_var_names <- setdiff(colnames(env_dist), c('pop1', 'pop2', 'p1', 'p2', 'geog'))
+if (!length(env_var_names) || anyDuplicated(env_var_names)) stop('Invalid environmental predictors.')
+
+diagnostics_dir <- paste0(args$out_prefix, '_mcmc_plots')
+dir.create(diagnostics_dir, recursive = TRUE, showWarnings = FALSE)
+writeLines(capture.output(sessionInfo()), paste0(args$out_prefix, '_session_info.txt'))
+saveRDS(args, paste0(args$out_prefix, '_postprocessing_settings.rds'))
+
+write_bedassle_summaries <- function(input_prefix) {
+  summaries <- lapply(env_var_names, function(variable) {
+    path <- paste0(input_prefix, '_', variable, '_MCMC_output1.Robj')
+    summarize_bedassle_file(path, variable, args$burnin,
+      file.path(diagnostics_dir, variable), ess_min = args$ess_min,
+      min_saved_states = args$min_saved_states, make_plots = !args$no_plots)
+  })
+  table <- do.call(rbind, lapply(summaries, `[[`, 'summary'))
+  parameters <- do.call(rbind, lapply(summaries, `[[`, 'diagnostics'))
+  # Write aggregate files only once every requested model has been processed.
+  write.csv(parameters, paste0(args$out_prefix, '_parameter_diagnostics.csv'), row.names = FALSE)
+  write.csv(table, paste0(args$out_prefix, '_BEDASSLE_RES_CI.csv'), row.names = FALSE)
+  cat(sprintf('Saved posterior credible intervals and diagnostics: %s\n', args$out_prefix))
+}
+
+if (args$summarize_only) {
+  input_prefix <- args$summary_input_prefix
+  if (is.null(input_prefix)) stop('--summary_input_prefix is required in summary-only mode.')
+  input_prefix <- file.path(normalizePath(dirname(input_prefix)), basename(input_prefix))
+  if (identical(input_prefix, args$out_prefix)) stop('Use a different output prefix to preserve original summaries.')
+  write_bedassle_summaries(input_prefix)
+  quit(save = 'no', status = 0)
+}
+
+if (is.null(args$vcf) || is.null(args$popmap)) stop('--vcf and --popmap are required for MCMC runs.')
+retained <- validate_bedassle_settings(args$ngen, args$burnin, args$samplefreq,
+                                      args$savefreq, args$min_saved_states)
+cat(sprintf('MCMC iterations: %d; burn-in: %d; retained states per model: %d\n',
+            args$ngen, args$burnin, retained))
+existing <- paste0(args$out_prefix, '_', env_var_names, '_MCMC_output1.Robj')
+if (any(file.exists(existing))) stop('MCMC outputs already exist under this prefix. Use a new prefix or summary-only mode.')
+
+run_metadata <- list(arguments = args,
+  input_md5 = tools::md5sum(c(args$vcf, args$popmap, args$env_dist)),
+  session_info = sessionInfo(), started_at = Sys.time(),
+  diagnostic_scope = 'sampled covariance hyperparameters, beta, population phi, and aE/aD; locus-specific theta/mu trajectories are not saved by BEDASSLE')
+saveRDS(run_metadata, paste0(args$out_prefix, '_run_metadata.rds'))
 
 cat("Loading files...\n")
 samples_info <- read.csv(args$popmap)
@@ -106,7 +180,6 @@ samples_matrix_n <- samples_matrix_n * 2 # Adjust (diploid, loss of one allele)
 cat("BEDASSLE input matrices prepared.\n")
 
 # Parse Pairwise Distance Matrix (env_dist)
-env_dist <- read.csv(args$env_dist)
 env_dist <- env_dist %>% rowwise() %>% mutate(
   p1 = min(as.character(pop1), as.character(pop2)),
   p2 = max(as.character(pop1), as.character(pop2))
@@ -137,9 +210,21 @@ for (var in env_var_names) {
 cat(sprintf("Prepared %d environmental variables for E.\n", length(env_matrices)))
 
 # MCMC wrapper function
-run_bedassle_mcmc <- function(E_matrix, var_name) {
+run_bedassle_mcmc <- function(E_matrix, var_name, index) {
   prefix_str <- paste0(args$out_prefix, "_", var_name, "_")
-  cat("Running BEDASSLE for variable:", var_name, "\n")
+  old_dir <- getwd()
+  log_connection <- file(paste0(prefix_str, 'chain.log'), open = 'wt')
+  sink(log_connection)
+  sink(log_connection, type = 'message')
+  on.exit({
+    sink(type = 'message')
+    sink()
+    close(log_connection)
+    setwd(old_dir)
+  }, add = TRUE)
+  set.seed(args$seed + index)
+  cat('Running BEDASSLE for variable:', var_name, '; seed:', args$seed + index, '\n')
+  started <- Sys.time()
   
   # Note: BEDASSLE outputs to the working directory / directory argument
   res <- BEDASSLE::MCMC_BB(
@@ -165,6 +250,9 @@ run_bedassle_mcmc <- function(E_matrix, var_name) {
     continue = FALSE,
     continuing.params = FALSE
   )
+  cat('MCMC returned:', res, '\nElapsed seconds:',
+      as.numeric(difftime(Sys.time(), started, units = 'secs')), '\n')
+  load_bedassle_chain(paste0(prefix_str, 'MCMC_output1.Robj'), args$burnin)
   return(prefix_str)
 }
 
@@ -174,45 +262,12 @@ cl <- makeCluster(num_threads, type = 'FORK')
 registerDoParallel(cl)
 
 # BEDASSLE execution loop
-prefixes <- foreach(iteration=1:length(env_matrices)) %dopar% {
-  run_bedassle_mcmc(env_matrices[[iteration]], names(env_matrices)[iteration])
-}
-
-stopCluster(cl)
+prefixes <- tryCatch({
+  foreach(iteration=seq_along(env_matrices), .errorhandling = 'stop') %dopar% {
+    run_bedassle_mcmc(env_matrices[[iteration]], names(env_matrices)[iteration], iteration)
+  }
+}, finally = stopCluster(cl))
 cat("All BEDASSLE MCMC runs completed.\n")
 
 # Combine Results into a summary CSV
-vars <- c()
-var_means <- c()
-var_CI <- c()
-
-for (i in 1:length(env_matrices)) {
-  var <- names(env_matrices)[i]
-  # output structure: {directory}/{prefix}MCMC_output1.Robj
-  robj_file <- file.path(out_dir, paste0(basename(args$out_prefix), "_", var, "_MCMC_output1.Robj"))
-  
-  if (file.exists(robj_file)) {
-    load(robj_file) # Loads aE, aD vectors from MCMC footprint
-    
-    ratio <- aE / aD
-    m_val <- round(mean(ratio, na.rm=TRUE), 4)
-    if (length(ratio) > 1 && sd(ratio) > 0) {
-      margin <- qt(0.975, df=(length(ratio)-1)) * sd(ratio) / sqrt(length(ratio))
-      ci_str <- paste0('[', round(m_val - margin, 3), ' - ', round(m_val + margin, 3), ']')
-    } else {
-      # If fewer steps or 0 variance
-      ci_str <- paste0('[', m_val, ' - ', m_val, ']')
-    }
-    
-    vars <- c(vars, var)
-    var_means <- c(var_means, m_val)
-    var_CI <- c(var_CI, ci_str)
-  } else {
-    warning(paste("Expected BEDASSLE output file not found:", robj_file))
-  }
-}
-
-res_df <- data.frame(Variable=vars, aE_aD_Mean=var_means, CI=var_CI)
-out_csv <- paste0(args$out_prefix, "_BEDASSLE_RES_CI.csv")
-write.csv(res_df, out_csv, row.names=FALSE)
-cat(sprintf("Final Results CI table written to %s.\n", out_csv))
+write_bedassle_summaries(args$out_prefix)

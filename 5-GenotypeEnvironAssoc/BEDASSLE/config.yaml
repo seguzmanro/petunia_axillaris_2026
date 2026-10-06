@@ -1,7 +1,7 @@
 # BEDASSLE Analysis Configuration
 
 # Define the output prefix
-out_prefix: "results/BEDASSLE_champion_noLD"
+out_prefix: "results/BEDASSLE_champion_noLD_17M"
 
 # Input Files
 vcf: "../../1-VariantCallFilt/07_freebayes/Paxil_M095_noLD.recode.vcf.gz"
@@ -10,7 +10,12 @@ env_dist: "../EnvironValriables/champion_EnvironVars_Selected_Distances.csv"
 
 # BEDASSLE MCMC Execution Parameters
 threads: 14
-ngen: 2000000
+# 68,000 total saved states; 51,000 retained after a 25% burn-in.
+ngen: 17000000
+burnin: 4250000
+min_saved_states: 50000
+ess_min: 400
+seed: 20261006
 printfreq: 10000
 savefreq: 100000
 samplefreq: 250

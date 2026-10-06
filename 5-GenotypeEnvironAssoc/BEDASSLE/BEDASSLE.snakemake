@@ -2,18 +2,26 @@ configfile: "config.yaml"
 
 rule all:
     input:
-        expand("{out_prefix}_BEDASSLE_RES_CI.csv", out_prefix=config["out_prefix"])
+        config["out_prefix"] + "_BEDASSLE_RES_CI.csv",
+        config["out_prefix"] + "_parameter_diagnostics.csv"
 
 rule run_bedassle:
     input:
         vcf = config["vcf"],
         popmap = config["popmap"],
-        env_dist = config["env_dist"]
+        env_dist = config["env_dist"],
+        script = "bedassle_script.R",
+        diagnostics = "bedassle_diagnostics.R"
     output:
-        ci_res = "{out_prefix}_BEDASSLE_RES_CI.csv"
+        ci_res = "{out_prefix}_BEDASSLE_RES_CI.csv",
+        diagnostics = "{out_prefix}_parameter_diagnostics.csv"
     params:
         out_prefix = "{out_prefix}",
-        ngen = config.get("ngen", 2000000),
+        ngen = config.get("ngen", 17000000),
+        burnin = config.get("burnin", 4250000),
+        min_saved_states = config.get("min_saved_states", 50000),
+        ess_min = config.get("ess_min", 400),
+        seed = config.get("seed", 20261006),
         printfreq = config.get("printfreq", 10000),
         savefreq = config.get("savefreq", 100000),
         samplefreq = config.get("samplefreq", 250),
@@ -29,12 +37,16 @@ rule run_bedassle:
         "{out_prefix}_bedassle.log"
     shell:
         """
-        Rscript bedassle_script.R \
-            --vcf {input.vcf} \
-            --popmap {input.popmap} \
-            --env_dist {input.env_dist} \
-            --out_prefix {params.out_prefix} \
+        Rscript {input.script:q} \
+            --vcf {input.vcf:q} \
+            --popmap {input.popmap:q} \
+            --env_dist {input.env_dist:q} \
+            --out_prefix {params.out_prefix:q} \
             --ngen {params.ngen} \
+            --burnin {params.burnin} \
+            --min_saved_states {params.min_saved_states} \
+            --ess_min {params.ess_min} \
+            --seed {params.seed} \
             --printfreq {params.printfreq} \
             --savefreq {params.savefreq} \
             --samplefreq {params.samplefreq} \
@@ -45,5 +57,5 @@ rule run_bedassle:
             --phi_stp {params.phi_stp} \
             --thetas_stp {params.thetas_stp} \
             --mu_stp {params.mu_stp} \
-            --threads {threads} &> {log}
+            --threads {threads} > {log:q} 2>&1
         """
